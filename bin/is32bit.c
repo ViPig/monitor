@@ -159,8 +159,39 @@ static int determine_pe_file(const wchar_t *filepath)
     return 0;
 }
 
+void grant_debug_privileges(uint32_t pid)
+{
+    HANDLE token_handle, process_handle = open_process(pid);
+
+    if(OpenProcessToken(process_handle, TOKEN_ALL_ACCESS,
+            &token_handle) == 0) {
+        error("[-] Error obtaining process token: %ld\n", GetLastError());
+    }
+
+    LUID original_luid;
+    if(LookupPrivilegeValue(NULL, SE_DEBUG_NAME, &original_luid) == 0) {
+        error("[-] Error obtaining original luid: %ld\n", GetLastError());
+    }
+
+    TOKEN_PRIVILEGES token_privileges;
+    token_privileges.PrivilegeCount = 1;
+    token_privileges.Privileges[0].Luid = original_luid;
+    token_privileges.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED; // enable, need to disable after done
+
+    if(AdjustTokenPrivileges(token_handle, FALSE, &token_privileges, 0, NULL,
+            NULL) == 0) {
+        error("[-] Error adjusting token privileges: %ld\n", GetLastError());
+    }
+
+    CloseHandle(token_handle);
+    CloseHandle(process_handle);
+}
+
 int main()
 {
+
+    grant_debug_privileges(GetCurrentProcessId());
+    
     LPWSTR *argv; int argc;
 
     argv = CommandLineToArgvW(GetCommandLineW(), &argc);

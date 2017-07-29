@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "xkeycheck.h": "c",
+        "processthreadsapi.h": "c",
+        "winnt.h": "c"
+    }
+}

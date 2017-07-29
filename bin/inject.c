@@ -405,7 +405,7 @@ void grant_debug_privileges(uint32_t pid)
     TOKEN_PRIVILEGES token_privileges;
     token_privileges.PrivilegeCount = 1;
     token_privileges.Privileges[0].Luid = original_luid;
-    token_privileges.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+    token_privileges.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED; // enable, need to disable after done
 
     if(AdjustTokenPrivileges(token_handle, FALSE, &token_privileges, 0, NULL,
             NULL) == 0) {
